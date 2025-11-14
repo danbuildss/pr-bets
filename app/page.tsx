@@ -1,119 +1,91 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useQuickAuth,useMiniKit } from "@coinbase/onchainkit/minikit";
-import { useRouter } from "next/navigation";
-import { minikitConfig } from "../minikit.config";
-import styles from "./page.module.css";
+'use client';
 
-interface AuthResponse {
-  success: boolean;
-  user?: {
-    fid: number; // FID is the unique identifier for the user
-    issuedAt?: number;
-    expiresAt?: number;
-  };
-  message?: string; // Error messages come as 'message' not 'error'
-}
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useAccount } from 'wagmi';
+import type { Context } from '@farcaster/miniapp-core';
+import { useGetAllBets } from '@/hooks/usePRBet';
+import { BetCard } from '@/components/bet-card';
+import { Loader } from '@/components/loader';
+import { Bet } from '@/lib/types';
 
+export default function HomePage() {
+  const { isConnected } = useAccount();
+  const { bets, loading, fetchBets } = useGetAllBets();
+  const [displayBets, setDisplayBets] = useState<Bet[]>([]);
+  const [context, setContext] = useState<Context.FrameContext>();
 
-export default function Home() {
-  const { isFrameReady, setFrameReady, context } = useMiniKit();
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const router = useRouter();
-
-  // Initialize the  miniapp
   useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [setFrameReady, isFrameReady]);
- 
-  
-
-  // If you need to verify the user's identity, you can use the useQuickAuth hook.
-  // This hook will verify the user's signature and return the user's FID. You can update
-  // this to meet your needs. See the /app/api/auth/route.ts file for more details.
-  // Note: If you don't need to verify the user's identity, you can get their FID and other user data
-  // via `context.user.fid`.
-  // const { data, isLoading, error } = useQuickAuth<{
-  //   userFid: string;
-  // }>("/api/auth");
-
-  const { data: authData, isLoading: isAuthLoading, error: authError } = useQuickAuth<AuthResponse>(
-    "/api/auth",
-    { method: "GET" }
-  );
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    // Check authentication first
-    if (isAuthLoading) {
-      setError("Please wait while we verify your identity...");
-      return;
-    }
-
-    if (authError || !authData?.success) {
-      setError("Please authenticate to join the waitlist");
-      return;
-    }
-
-    if (!email) {
-      setError("Please enter your email address");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-
-    // TODO: Save email to database/API with user FID
-    console.log("Valid email submitted:", email);
-    console.log("User authenticated:", authData.user);
+    fetchBets();
     
-    // Navigate to success page
-    router.push("/success");
-  };
+    const loadContext = async () => {
+      try {
+        const sdk = await import('@farcaster/miniapp-sdk');
+        if (sdk?.default?.context) {
+          const frameContext = await sdk.default.context;
+          setContext(frameContext);
+          console.log('[v0] Farcaster context loaded:', frameContext);
+        }
+      } catch (error) {
+        console.log('[v0] Not running in Farcaster frame');
+      }
+    };
+    
+    loadContext();
+  }, []);
+
+  useEffect(() => {
+    setDisplayBets(bets.slice(0, 3));
+  }, [bets]);
 
   return (
-    <div className={styles.container}>
-      <button className={styles.closeButton} type="button">
-        ✕
-      </button>
-      
-      <div className={styles.content}>
-        <div className={styles.waitlistForm}>
-          <h1 className={styles.title}>Join {minikitConfig.miniapp.name.toUpperCase()}</h1>
-          
-          <p className={styles.subtitle}>
-             Hey {context?.user?.displayName || "there"}, Get early access and be the first to experience the future of<br />
-            crypto marketing strategy.
-          </p>
-
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <input
-              type="email"
-              placeholder="Your amazing email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={styles.emailInput}
-            />
-            
-            {error && <p className={styles.error}>{error}</p>}
-            
-            <button type="submit" className={styles.joinButton}>
-              JOIN WAITLIST
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          Predict Personal Records
+        </h1>
+        <p className="text-xl text-white/70 mb-8 max-w-2xl">
+          Bet on fitness goals with the community. Winner takes all from the losing side's pool. Zero protocol risk, pure prediction market.
+        </p>
+        
+        {!isConnected ? (
+          <div className="inline-block bg-blue-600/20 border border-blue-500/30 rounded-lg p-4 mb-8">
+            <p className="text-white mb-2">Connect your wallet to get started</p>
+          </div>
+        ) : (
+          <Link href="/create">
+            <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+              Create a Bet
             </button>
-          </form>
-        </div>
+          </Link>
+        )}
+      </div>
+
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold text-white mb-6">Featured Bets</h2>
+        {loading ? (
+          <div className="py-12">
+            <Loader />
+          </div>
+        ) : displayBets.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayBets.map((bet) => (
+              <BetCard key={bet.id} bet={bet} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-white/60">
+            <p>No bets available yet. Be the first to create one!</p>
+          </div>
+        )}
+      </div>
+
+      <div className="text-center">
+        <Link href="/bets">
+          <button className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+            View All Bets
+          </button>
+        </Link>
       </div>
     </div>
   );

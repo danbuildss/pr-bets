@@ -1,159 +1,149 @@
-# Waitlist Mini App Quickstart
+# PR Bet - Base Mini App
 
-This is a demo Mini App application built using OnchainKit and the Farcaster SDK. Build a waitlist sign-up mini app for your company that can be published to the Base app and Farcaster. 
+A lightweight prediction market for personal record achievements built on Base.
 
-> [!IMPORTANT]  
-> Before interacting with this demo, please review our [disclaimer](#disclaimer) — there are **no official tokens or apps** associated with Cubey, Base, or Coinbase.
+## Features
 
-## Prerequisites
-
-Before getting started, make sure you have:
-
-* Base app account
-* A [Farcaster](https://farcaster.xyz/) account
-* [Vercel](https://vercel.com/) account for hosting the application
-* [Coinbase Developer Platform](https://portal.cdp.coinbase.com/) Client API Key
+- **Create PR Bets** - Set fitness goals with deadlines and verification methods
+- **Community Betting** - Users stake USDC on YES/NO outcomes
+- **Proof Submission** - Submit verification (Twitter links, etc.)
+- **Winner Rewards** - Winners claim proportional share of loser pool
+- **Mobile First** - Fully responsive Base Mini app
 
 ## Getting Started
 
-### 1. Clone this repository 
+### Prerequisites
 
-```bash
-git clone https://github.com/base/demos.git
-```
+- Node.js 18+
+- Wallet with Base Sepolia testnet
+- Testnet USDC
 
-### 2. Install dependencies:
+### Installation
 
-```bash
-cd demos/minikit/waitlist-mini-app-qs
+\`\`\`bash
 npm install
-```
+\`\`\`
 
-### 3. Configure environment variables
+### Environment Setup
 
-Create a `.env.local` file and add your environment variables:
+Create a `.env.local` file:
 
-```bash
-NEXT_PUBLIC_PROJECT_NAME="Your App Name"
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=<Replace-WITH-YOUR-CDP-API-KEY>
-NEXT_PUBLIC_URL=
-```
+\`\`\`
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x... # Your deployed PRBetMarket contract
+NEXT_PUBLIC_USDC_ADDRESS=0x...     # Base Sepolia USDC address
+NEXT_PUBLIC_BASE_SEPOLIA_RPC=https://sepolia.base.org
+NEXT_PUBLIC_ADMIN_ADDRESS=0x...    # Admin address for resolving bets
+NEXT_PUBLIC_WALLET_CONNECT_ID=...  # WalletConnect project ID
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+\`\`\`
 
-### 4. Run locally:
+### Development
 
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
-## Customization
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Update Manifest Configuration
+## Project Structure
 
-The `minikit.config.ts` file configures your manifest located at `app/.well-known/farcaster.json`.
+\`\`\`
+app/
+├── page.tsx              # Home page
+├── bets/
+│   ├── page.tsx          # All bets listing
+│   └── [id]/page.tsx     # Bet detail page
+├── create/page.tsx       # Create bet page
+├── profile/page.tsx      # User profile & bets
+├── layout.tsx            # Root layout
+├── globals.css           # Tailwind styles
+├── providers.tsx         # Wagmi/Rainbow Kit setup
+└── wagmi.config.ts       # Wagmi chain config
 
-**Skip the `accountAssociation` object for now.**
+components/
+├── navbar.tsx            # Navigation bar
+├── wallet-button.tsx     # Connect wallet button
+├── bet-card.tsx          # Bet card component
+├── bet-pool.tsx          # Pool visualization
+├── bet-form.tsx          # Create bet form
+├── button.tsx            # Reusable button
+├── modal.tsx             # Modal wrapper
+├── join-bet-modal.tsx    # Place bet modal
+├── submit-proof-modal.tsx # Submit proof modal
+├── claim-winnings-modal.tsx # Claim winnings modal
+├── loader.tsx            # Loading spinner
+├── empty-state.tsx       # Empty state component
+└── modals-wrapper.tsx    # All modals container
 
-To personalize your app, change the `name`, `subtitle`, and `description` fields and add images to your `/public` folder. Then update their URLs in the file.
+hooks/
+└── usePRBet.ts           # Contract interaction hooks
+
+lib/
+├── types.ts              # TypeScript interfaces
+├── constants.ts          # Contract ABI & constants
+├── contract.ts           # Contract utilities
+├── store.ts              # Zustand state store
+└── utils.ts              # Helper functions
+\`\`\`
+
+## Contract Integration
+
+Update the contract interaction functions in `hooks/usePRBet.ts` with actual contract calls once your `PRBetMarket.sol` is deployed.
+
+Replace these placeholders:
+- `useCreateBet()` - Call `contract.createBet()`
+- `usePlaceBet()` - Call `contract.placeBet()`
+- `useSubmitProof()` - Call `contract.submitProof()`
+- `useClaimWinnings()` - Call `contract.claimWinnings()`
+- `useGetAllBets()` - Call `contract.getAllBets()`
+- `useGetBet()` - Call `contract.getBet()`
+- `useGetUserBets()` - Call `contract.getUserBets()`
 
 ## Deployment
 
-### 1. Deploy to Vercel
+\`\`\`bash
+npm run build
+npm start
+\`\`\`
 
-```bash
-vercel --prod
-```
+Deploy to Vercel:
 
-You should have a URL deployed to a domain similar to: `https://your-vercel-project-name.vercel.app/`
+\`\`\`bash
+vercel deploy
+\`\`\`
 
-### 2. Update environment variables
+## Key Configuration
 
-Add your production URL to your local `.env` file:
+### Chain
+- **Network**: Base Sepolia (84532)
+- **RPC**: https://sepolia.base.org
 
-```bash
-NEXT_PUBLIC_PROJECT_NAME="Your App Name"
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=<Replace-WITH-YOUR-CDP-API-KEY>
-NEXT_PUBLIC_URL=https://your-vercel-project-name.vercel.app/
-```
+### Wallet Integration
+- **RainbowKit** - Multi-wallet support
+- **Wagmi** - React hooks for Ethereum
+- **Viem** - Contract interactions
 
-### 3. Upload environment variables to Vercel
+### State Management
+- **Zustand** - User bets cache, modals, loading states
 
-Add environment variables to your production environment:
+## Design
 
-```bash
-vercel env add NEXT_PUBLIC_PROJECT_NAME production
-vercel env add NEXT_PUBLIC_ONCHAINKIT_API_KEY production
-vercel env add NEXT_PUBLIC_URL production
-```
+- **Theme**: Dark mode (black/white/blue)
+- **Mobile First**: Responsive on all devices
+- **Components**: Tailwind CSS utility-first
+- **Icons**: Minimal SVG
 
-## Account Association
+## Development Tips
 
-### 1. Sign Your Manifest
+1. **Skeleton Loaders** - Replace `Loader` component with skeletons
+2. **Error Handling** - All contract calls use toast notifications
+3. **Contract Placeholders** - ABI is configured in `lib/constants.ts`
+4. **TypeScript**: Full type safety for contract parameters
 
-1. Navigate to [Farcaster Manifest tool](https://farcaster.xyz/~/developers/mini-apps/manifest)
-2. Paste your domain in the form field (ex: your-vercel-project-name.vercel.app)
-3. Click the `Generate account association` button and follow the on-screen instructions for signing with your Farcaster wallet
-4. Copy the `accountAssociation` object
+## License
 
-### 2. Update Configuration
+MIT
 
-Update your `minikit.config.ts` file to include the `accountAssociation` object:
+## Support
 
-```ts
-export const minikitConfig = {
-    accountAssociation: {
-        "header": "your-header-here",
-        "payload": "your-payload-here",
-        "signature": "your-signature-here"
-    },
-    frame: {
-        // ... rest of your frame configuration
-    },
-}
-```
-
-### 3. Deploy Updates
-
-```bash
-vercel --prod
-```
-
-## Testing and Publishing
-
-### 1. Preview Your App
-
-Go to [base.dev/preview](https://base.dev/preview) to validate your app:
-
-1. Add your app URL to view the embeds and click the launch button to verify the app launches as expected
-2. Use the "Account association" tab to verify the association credentials were created correctly
-3. Use the "Metadata" tab to see the metadata added from the manifest and identify any missing fields
-
-### 2. Publish to Base App
-
-To publish your app, create a post in the Base app with your app's URL.
-
-## Learn More
-
-For detailed step-by-step instructions, see the [Create a Mini App tutorial](https://docs.base.org/docs/mini-apps/quickstart/create-new-miniapp/) in the Base documentation.
-
-
----
-
-## Disclaimer  
-
-This project is a **demo application** created by the **Base / Coinbase Developer Relations team** for **educational and demonstration purposes only**.  
-
-**There is no token, cryptocurrency, or investment product associated with Cubey, Base, or Coinbase.**  
-
-Any social media pages, tokens, or applications claiming to be affiliated with, endorsed by, or officially connected to Cubey, Base, or Coinbase are **unauthorized and fraudulent**.  
-
-We do **not** endorse or support any third-party tokens, apps, or projects using the Cubey name or branding.  
-
-> [!WARNING]
-> Do **not** purchase, trade, or interact with any tokens or applications claiming affiliation with Coinbase, Base, or Cubey.  
-> Coinbase and Base will never issue a token or ask you to connect your wallet for this demo.  
-
-For official Base developer resources, please visit:  
-- [https://base.org](https://base.org)  
-- [https://docs.base.org](https://docs.base.org)  
-
----
+For Base MiniKit documentation, visit [base.org/minikit](https://base.org/minikit)
