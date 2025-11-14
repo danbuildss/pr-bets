@@ -1,20 +1,15 @@
 {
-  "accountAssociation": {
-    "header": "eyJhbGciOiJFZERTQSIsImtpZCI6IjBkNzg0MWU3LTc5MjAtNDZkYy04MjA5LTJkOGI5MDBhYjI1MCJ9",
-    "payload": "eyJkb21haW4iOiJwcmJldHMuZnVuIiwibm9uY2UiOiI1MDkxODQ4NiJ9",
-    "signature": "PUT_YOUR_SIGNATURE_HERE"
-  },
-  "name": "PR Bet",
-  "icon": "https://prbets.fun/icon.svg",
-  "logo": "https://prbets.fun/icon.svg",
-  "logoDark": "https://prbets.fun/icon.svg",
-  "description": "Predict and bet on personal record achievements with the community",
-  "homepage": "https://prbets.fun",
-  "splashImageUrl": "https://prbets.fun/icon.svg",
-  "splashBackgroundColor": "#000000",
-  "website": "https://prbets.fun",
-  "terms": "https://prbets.fun",
-  "privacy": "https://prbets.fun",
-  "requiredFrameAnnouncements": [],
-  "optionalFrameAnnouncements": []
+  "frame": {
+    "name": "PR BETS",
+    "version": "1",
+    "iconUrl": "https://prbets.fun/icon.jpg",
+    "homeUrl": "https://prbets.fun",
+    "imageUrl": "https://prbets.fun/image.jpg",
+    "splashImageUrl": "https://prbets.fun/splash.jpg",
+    "splashBackgroundColor": "#0A0F2C",
+    "webhookUrl": "https://prbets.fun/api/webhook",
+    "primaryCategory": "health-fitness",
+    "subtitle": "Bet on Personal Records. Win USDC.",
+    "description": "A simple on-chain prediction app where you bet USDC on whether someone will hit their fitness goal (PR). Submit proof, resolve results, and winners claim the reward pool."
+  }
 }
